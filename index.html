@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Realistic 3D Bike & Scooter Riding Learning Simulator</title>
+    <!-- External CSS dependencies -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Three.js 3D Graphics Engine -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+</head>
+<body>
+
+    <!-- Main Navigation / Menu Overlay -->
+    <div id="main-menu" class="overlay-screen active">
+        <div class="menu-container">
+            <h1 class="game-title">3D Bike & Scooter Learning Simulator</h1>
+            <p class="game-subtitle">Interactive Riding & Safety Guide (বাংলা)</p>
+            
+            <div class="menu-buttons-grid">
+                <button class="btn-menu" onclick="navigateTo('lessons-screen')">1. Start Learning (শিক্ষা শুরু)</button>
+                <button class="btn-menu" onclick="navigateTo('real-life-screen')">2. Real Life Practice (বাস্তব অভিজ্ঞতা)</button>
+                <button class="btn-menu" onclick="navigateTo('free-ride-screen')">3. Free Riding Practice (ফ্রি রাইড)</button>
+                <button class="btn-menu" onclick="openGarage('bike')">4. Bike Garage (বাইক গ্যারেজ)</button>
+                <button class="btn-menu" onclick="openGarage('scooter')">5. Scooter Garage (স্কুটার গ্যারেজ)</button>
+                <button class="btn-menu" onclick="navigateTo('parts-learning-screen')">6. Parts Learning (৩০টি পার্টস)</button>
+                <button class="btn-menu" onclick="navigateTo('progress-screen')">7. My Progress (অগ্রগতি)</button>
+                <button class="btn-menu" onclick="navigateTo('settings-screen')">8. Settings (সেটিংস)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3D Canvas Container -->
+    <div id="canvas-container"></div>
+
+    <!-- Garage Screen -->
+    <div id="garage-screen" class="overlay-screen hidden">
+        <div class="top-bar">
+            <button class="btn-back" onclick="showMainMenu()">← Main Menu</button>
+            <h2 id="garage-title">Vehicle Selection</h2>
+        </div>
+        
+        <div class="garage-carousel">
+            <div id="vehicle-card" class="card">
+                <h3 id="vehicle-name">Honda Bike</h3>
+                <p id="vehicle-type">Manual Transmission</p>
+                <div class="vehicle-specs">
+                    <span id="spec-engine">Engine: 150cc</span>
+                    <span id="spec-clutch">Clutch: Manual</span>
+                </div>
+                <button class="btn-action" onclick="selectCurrentVehicle()">Select Vehicle</button>
+            </div>
+        </div>
+
+        <div class="garage-controls">
+            <button class="btn-nav" onclick="prevVehicle()">Previous</button>
+            <button class="btn-nav" onclick="nextVehicle()">Next</button>
+        </div>
+    </div>
+
+    <!-- Parts Learning Screen (30 Parts) -->
+    <div id="parts-learning-screen" class="overlay-screen hidden">
+        <div class="top-bar">
+            <button class="btn-back" onclick="showMainMenu()">← Main Menu</button>
+            <h2>30 Vehicle Parts Learning (যন্ত্রাংশ পরিচিতি)</h2>
+        </div>
+
+        <div class="parts-container">
+            <div class="parts-sidebar">
+                <ul id="parts-list">
+                    <!-- Part items will be dynamically populated by JavaScript -->
+                </ul>
+            </div>
+            
+            <div class="part-details-panel">
+                <h3 id="part-title-bn">পার্টস নির্বাচন করুন</h3>
+                <h4 id="part-title-en">Select a Part</h4>
+                <p id="part-description">বাম পাশের তালিকা থেকে যেকোনো যন্ত্রাংশ বেছে নিয়ে তার কাজ এবং ব্যবহার সম্পর্কিত বিস্তারিত তথ্য দেখুন।</p>
+                <div id="part-demo-action" class="hidden">
+                    <button class="btn-interactive" onclick="triggerPartAction()">Interactive Test</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dynamic Overlay for Interactive Lessons System -->
+    <div id="lesson-hud" class="hud-layer hidden">
+        <div class="instructor-box">
+            <div class="avatar">👨‍🏫 Instructor</div>
+            <div class="speech-bubble">
+                <h4 id="instructor-step-title">পাঠ ১: পরিচিতি</h4>
+                <p id="instructor-speech">স্বাগতম! বাইক চালানোর আগে এর প্রতিটি নিয়ন্ত্রণব্যবস্থা সঠিকভাবে জানা জরুরি।</p>
+            </div>
+        </div>
+
+        <!-- Touch Controls for Simulation -->
+        <div class="mobile-controls-container">
+            <!-- Left Controls: Clutch & Steering/Brake -->
+            <div class="control-group left">
+                <button id="btn-clutch" class="touch-btn manual-only">Clutch</button>
+                <button id="btn-rear-brake" class="touch-btn">Rear Brake</button>
+            </div>
+
+            <!-- Dashboard Central Display -->
+            <div class="dashboard-hud">
+                <div class="speedometer"><span id="speed-val">0</span> km/h</div>
+                <div class="gear-indicator" id="gear-val">N</div>
+            </div>
+
+            <!-- Right Controls: Throttle, Front Brake, Ignition -->
+            <div class="control-group right">
+                <button id="btn-front-brake" class="touch-btn">Front Brake</button>
+                <button id="btn-throttle" class="touch-btn">Throttle</button>
+                <button id="btn-start" class="touch-btn start-btn">Self Start</button>
+            </div>
+        </div>
+    </div>
+<!-- Corrected Scripts Loading Order -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <!-- Project JS Files (Must follow this order) -->
+    <script src="vehicles.js"></script>
+    <script src="lessons.js"></script>
+    <script src="controls.js"></script>
+    <script src="environment.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
